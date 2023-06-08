@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import java.util.*
@@ -20,58 +21,34 @@ class MainActivity : AppCompatActivity() {
         val stop = findViewById<Button>(R.id.stop);
         val count = findViewById<EditText>(R.id.count);
         val delay = findViewById<EditText>(R.id.delay);
-        val timer = Timer()
-        var totalcount: Int
         run.setOnClickListener {
             if(count.text.isNullOrEmpty() || delay.text.isNullOrEmpty()) {
                 return@setOnClickListener
             }
-            totalcount = count.text.toString().toInt()
-            timer.scheduleAtFixedRate(
-                object : TimerTask() {
-                    override fun run() {
-                        try {
-                            comeToFront()
-                            search()
-                        }catch (_: Exception) { }
-                        runOnUiThread {
-                            try {
-                                count.setText((--totalcount).toString())
-                            }catch (_: Exception) { }
-                            if(totalcount <= 0) {
-                                this.cancel()
-                            }
-                        }
-                    }
-                },0,delay.text.toString().toLong()*1000
-            )
+            SearchService.count = count.text.toString().toInt()
+            SearchService.delay = delay.text.toString().toInt()
+            c = count.text.toString().toInt()
+            d = delay.text.toString().toInt()
+            print(SearchService.count)
+            startService(Intent(applicationContext,SearchService::class.java))
+
         }
         stop.setOnClickListener {
-            timer.cancel()
+            stopService(Intent(applicationContext,SearchService::class.java))
+        }
+        setOutput = {
+            runOnUiThread {
+                findViewById<TextView>(R.id.output).text = "Completed : $it"
+            }
+        }
+        intent.extras?.let {
+            val completed = it.getInt("completed")
+            setOutput(completed)
         }
     }
-    fun generateRandomString(length: Int): String {
-        val charPool : List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9') // Define the characters to choose from
-        return (1..length)
-            .map { Random.nextInt(0, charPool.size) }
-            .map(charPool::get)
-            .joinToString("")
-    }
-    fun search(){
-        val url = "https://www.bing.com/search?q="+generateRandomString(10) // The URL you want to open
-        val packageName = "com.microsoft.emmx" // Package name of the desired browser app
-
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-        intent.setPackage(packageName)
-        try {
-            println(url)
-            startActivity(intent)
-        }catch (_: Exception) {
-            Toast.makeText(this,"Please install Edge browser",Toast.LENGTH_LONG).show()
-        }
-    }
-    fun comeToFront() {
-        val intent = Intent("${applicationContext.packageName}.actions.recycle")
-        sendBroadcast(intent)
+    companion object{
+        var c = 1
+        var d = 1
+        var setOutput : (Int) -> Unit = {}
     }
 }
