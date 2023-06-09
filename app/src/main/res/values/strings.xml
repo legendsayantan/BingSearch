@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">BingSearch</string>
+    <string name="edge">com.microsoft.emmx</string>
+    <string name="edgeMain">com.microsoft.ruby.Main</string>
 </resources>

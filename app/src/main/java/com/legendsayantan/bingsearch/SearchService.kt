@@ -1,11 +1,10 @@
 package com.legendsayantan.bingsearch
 
 import android.app.Service
+import android.content.ComponentName
 import android.content.Intent
 import android.net.Uri
-import android.os.Handler
 import android.os.IBinder
-import android.os.Looper
 import android.widget.Toast
 import java.util.Timer
 import java.util.TimerTask
@@ -24,6 +23,7 @@ class SearchService : Service() {
         count = MainActivity.c
         delay = MainActivity.d
         val total = count
+        if(startEdge())
         timer.scheduleAtFixedRate(
             object : TimerTask() {
                 override fun run() {
@@ -38,7 +38,7 @@ class SearchService : Service() {
                     MainActivity.setOutput(total - count)
                     search()
                 }
-            },0,delay*1000L
+            },5000L,delay*1000L
         )
     }
     fun generateRandomString(length: Int): String {
@@ -54,9 +54,23 @@ class SearchService : Service() {
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
         startActivity(intent)
     }
+
+    private fun startEdge(): Boolean{
+        val intent = Intent()
+        intent.component = ComponentName(getString(R.string.edge), getString(R.string.edgeMain))
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        return try {
+            startActivity(intent)
+            true
+        }catch (e:Exception){
+            e.printStackTrace()
+            Toast.makeText(applicationContext,"Install Microsoft Edge",Toast.LENGTH_LONG).show()
+            false
+        }
+    }
     fun search(){
         val url = "https://www.bing.com/search?q="+generateRandomString(10) // The URL you want to open
-        val packageName = "com.microsoft.emmx" // Package name of the desired browser app
+        val packageName = getString(R.string.edge) // Package name of the desired browser app
 
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
         intent.setPackage(packageName)
