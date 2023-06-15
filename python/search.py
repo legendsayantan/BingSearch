@@ -1,6 +1,6 @@
 import random
 import string
-import webbrowser
+import subprocess
 import time
 
 # Generate 30 random words
@@ -10,8 +10,9 @@ for i in range(34):
     word = ''.join(random.choice(string.ascii_lowercase) for j in range(random.randint(5, 10)))
     words.append(word)
 
-# Search each word on Bing
+# put your path to edge browser in the variable
+edge_path = r"C:\Users\Admin\AppData\Local\Microsoft\Edge\Application\msedge.exe"  # Replace with the actual Chrome executable path
 for word in words:
     search_url = f'https://www.bing.com/search?q={word}'
-    webbrowser.open_new_tab(search_url)
+    subprocess.Popen([edge_path, search_url])
     time.sleep(2)
